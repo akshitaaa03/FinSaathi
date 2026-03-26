@@ -47,3 +47,4 @@ async def chat(request:chatRequest):
     reply=get_bot_response(request.message)
     return {"reply":reply}
     
+
