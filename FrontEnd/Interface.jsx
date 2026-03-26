@@ -194,8 +194,8 @@ function ChatBot({financials,open,onClose}){
     setInput(""); const newMsgs=[...msgs,{role:"user",content:text}]; setMsgs(newMsgs); setLoading(true);
     const ctx=`User finances: Income ${fmt(financials.income)}/mo, Expenses ${fmt(financials.expenses)}/mo, Savings ${fmt(financials.savings)}/mo, Loans: ${financials.loans?"Yes":"No"}, Investing: ${financials.investments?"Yes":"No"}, Score: ${financials.score}/100 (${financials.status}), Goal: ${financials.goal}. Savings rate: ${Math.round(financials.savings/(financials.income||1)*100)}%, Expense ratio: ${Math.round(financials.expenses/(financials.income||1)*100)}%.`;
     try{
-      const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",
-        headers:{"Content-Type":"application/json","x-api-key":"placeholder","anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
+      const res=await fetch("https://api.groq.com/openai/v1/chat/completions",{method:"POST",
+        headers:{"Content-Type":"application/json","Authorization":"placeholder","anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
         body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,
           system:`You are FinSathi AI — a warm, brilliant Indian personal finance mentor. ${ctx} Give advice that is: personalized to exact numbers, concise (2-4 sentences), action-oriented with specific ₹ amounts, uses Indian instruments (SIP, PPF, FD, ELSS, NPS, liquid funds). Be encouraging, never preachy. Use emojis sparingly.`,
           messages:newMsgs.map(m=>({role:m.role,content:m.content}))})});
