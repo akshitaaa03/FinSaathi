@@ -189,22 +189,38 @@ function ChatBot({financials,open,onClose}){
   const ref=useRef(null);
   useEffect(()=>{if(ref.current)ref.current.scrollTop=ref.current.scrollHeight;},[msgs,loading]);
 
-  const send=async()=>{
-    const text=input.trim(); if(!text||loading)return;
-    setInput(""); const newMsgs=[...msgs,{role:"user",content:text}]; setMsgs(newMsgs); setLoading(true);
-    const ctx=`User finances: Income ${fmt(financials.income)}/mo, Expenses ${fmt(financials.expenses)}/mo, Savings ${fmt(financials.savings)}/mo, Loans: ${financials.loans?"Yes":"No"}, Investing: ${financials.investments?"Yes":"No"}, Score: ${financials.score}/100 (${financials.status}), Goal: ${financials.goal}. Savings rate: ${Math.round(financials.savings/(financials.income||1)*100)}%, Expense ratio: ${Math.round(financials.expenses/(financials.income||1)*100)}%.`;
-    try{
-      const res=await fetch("https://api.groq.com/openai/v1/chat/completions",{method:"POST",
-        headers:{"Content-Type":"application/json","Authorization":"placeholder","anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
-        body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,
-          system:`You are FinSathi AI — a warm, brilliant Indian personal finance mentor. ${ctx} Give advice that is: personalized to exact numbers, concise (2-4 sentences), action-oriented with specific ₹ amounts, uses Indian instruments (SIP, PPF, FD, ELSS, NPS, liquid funds). Be encouraging, never preachy. Use emojis sparingly.`,
-          messages:newMsgs.map(m=>({role:m.role,content:m.content}))})});
-      const data=await res.json();
-      const reply=data.content?.filter(b=>b.type==="text").map(b=>b.text).join("")||"Let me think on that 🤔";
-      setMsgs(m=>[...m,{role:"assistant",content:reply}]);
-    }catch{setMsgs(m=>[...m,{role:"assistant",content:"Connection hiccup! Try again? 🙏"}]);}
+
+  const send = async () => {
+    const text = input.trim();
+    if (!text || loading) return;
+
+    setInput("");
+    const newMsgs = [...msgs, { role: "user", content: text }];
+    setMsgs(newMsgs);
+    setLoading(true);
+
+    const ctx = `User finances: Income ${fmt(financials.income)}/mo, Expenses ${fmt(financials.expenses)}/mo, Savings ${fmt(financials.savings)}/mo, Loans: ${financials.loans ? "Yes" : "No"}, Investing: ${financials.investments ? "Yes" : "No"}, Score: ${financials.score}/100 (${financials.status}), Goal: ${financials.goal}. Savings rate: ${Math.round(financials.savings / (financials.income || 1) * 100)}%, Expense ratio: ${Math.round(financials.expenses / (financials.income || 1) * 100)}%.`;
+
+    try {
+      const res = await fetch("http://127.0.0.1:8000/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: `${ctx}\nUser: ${text}` }),
+      });
+
+      if (!res.ok) throw new Error("Server error");
+
+      const data = await res.json();
+      const reply = data.reply || "Let me think on that 🤔";
+      setMsgs(m => [...m, { role: "assistant", content: reply }]);
+    } catch (err) {
+      console.error("ERROR:", err);
+      setMsgs(m => [...m, { role: "assistant", content: "Connection hiccup! Try again? 🙏" }]);
+    }
+
     setLoading(false);
   };
+
 
   const qs=["How to improve my score?","Best SIP for me?","When will I reach my goal?","How to reduce expenses?"];
   return(
@@ -220,7 +236,7 @@ function ChatBot({financials,open,onClose}){
             <div style={{display:"flex",alignItems:"center",gap:10}}>
               <div style={{width:36,height:36,borderRadius:12,background:"linear-gradient(135deg,#7c3aed,#38bdf8)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,boxShadow:"0 4px 16px rgba(124,58,237,0.4)"}}>🤖</div>
               <div>
-                <div style={{fontFamily:"'Cormorant Garamond',serif",fontWeight:700,fontSize:16,color:"#f1f5f9"}}>FinSathi AI</div>
+                <div style={{fontFamily:"'Cormorant Garamond',serif",fontWeight:700,fontSize:16,color:"#f1f5f9"}}>FinSaathi AI</div>
                 <div style={{display:"flex",alignItems:"center",gap:5}}>
                   <div style={{width:5,height:5,borderRadius:"50%",background:"#34d399",boxShadow:"0 0 6px #34d399"}}/>
                   <span style={{fontFamily:"'Outfit'",fontSize:10,color:"#34d399",fontWeight:500}}>Online · Ready to help</span>
@@ -274,7 +290,7 @@ function ChatBot({financials,open,onClose}){
   );
 }
 
-export default function FinSathiAI(){
+export default function App(){
   const [step,setStep]=useState("hero");
   const [income,setIncome]=useState(80000);
   const [expenses,setExpenses]=useState(45000);
@@ -372,7 +388,7 @@ export default function FinSathiAI(){
               {/* Nav */}
               <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:44}}>
                 <button onClick={()=>setStep("hero")} style={{background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.09)",borderRadius:11,padding:"7px 15px",color:"#475569",fontFamily:"'Outfit'",fontSize:12,cursor:"pointer"}}>← Back</button>
-                <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:22,fontWeight:700,background:"linear-gradient(135deg,#a78bfa,#38bdf8)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>FinSathi AI</div>
+                <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:22,fontWeight:700,background:"linear-gradient(135deg,#a78bfa,#38bdf8)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>FinSaathi AI</div>
                 <div style={{width:70}}/>
               </div>
 
