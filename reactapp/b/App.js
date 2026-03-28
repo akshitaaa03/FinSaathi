@@ -89,7 +89,6 @@ const THEMES = {
 
 // ─── GROQ CONFIG ─────────────────────────────────────────────────────────────
 // Replace with your actual Groq API key
-const GROQ_API_KEY = "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";
 const GROQ_MODEL   = "llama3-70b-8192"; // or "mixtral-8x7b-32768" / "gemma-7b-it"
 
 const C = {
